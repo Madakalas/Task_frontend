@@ -63,11 +63,13 @@ export default function Home() {
   // Fetch all locations once for dropdown
   const fetchAllLocations = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/properties?limit=100`)
+      const res = await fetch(`${API_BASE}/api/properties?limit=200`)
       if (!res.ok) return
       const data: ApiResponse = await res.json()
       if (data.success) {
-        const locs = Array.from(new Set(data.data.map(p => p.location).filter(Boolean))) as string[]
+        const locs = Array.from(
+          new Set(data.data.map((p: Property) => p.location).filter(Boolean))
+        ).sort() as string[]
         setAllLocations(locs)
       }
     } catch {}
@@ -96,8 +98,7 @@ export default function Home() {
         setTotalPages(data.pagination.totalPages)
         setCurrentPage(data.pagination.page)
         setTotal(data.pagination.total)
-        const locs = Array.from(new Set(data.data.map(p => p.location).filter(Boolean))) as string[]
-        setLocations(prev => Array.from(new Set([...prev, ...locs])))
+        // locations are fetched separately via fetchAllLocations
       }
     } catch {
       setError('Could not connect to the server. Make sure the backend is running on port 8000.')
@@ -113,7 +114,8 @@ export default function Home() {
   useEffect(() => {
     setCurrentPage(1)
     fetchProperties(1, filters)
-  }, [filters, fetchProperties])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -128,7 +130,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <Hero />
-      <FilterBar onFiltersChange={setFilters} locations={mergedLocations} />
+      <FilterBar onFiltersChange={(f) => { setCurrentPage(1); setFilters(f); }} locations={mergedLocations} />
 
       {/* Results bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
