@@ -293,7 +293,7 @@ async function main() {
     imagePaths.forEach(p => { try { fs.unlinkSync(p) } catch {} })
     console.log()
 
-    await sleep(300)
+    await sleep(15000) // wait 15s between properties to let AI finish
   }
 
   try { fs.rmdirSync(tmpDir) } catch {}
